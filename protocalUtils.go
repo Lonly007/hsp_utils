@@ -36,6 +36,14 @@ type SelfProtocal struct {
 }
 
 //协议解析
+/*
+2021/10/20日
+协议解析在多包处理时存在隐患，表述如下：
+1）现在消息头中的数据长度为整个多包协议的长度，应该改为当前包的长度；
+2）现在多包协议的发送过程中如果其他线程并行发送了其他cmdID的数据，
+   会导致整个多包协议的获取和解析出错，因为协议长度按照1）中方式获取，
+   处理时认为多包协议是连在一起发送，并未夹杂其他协议
+*/
 func AnalysisSelfProtocalsMsg(rbuf *ringbuffer.RingBuffer) *SelfProtocal {
 	res := &SelfProtocal{}
 

@@ -3,6 +3,8 @@ package hsp_utils
 import (
 	"math"
 	"math/rand"
+	"os"
+	"path/filepath"
 	"strconv"
 	"sync"
 	"time"
@@ -172,4 +174,19 @@ func ConvInterface2Bool(srcData interface{}) bool {
 	}
 
 	return res
+}
+
+func GetCurrentDir() (string, error) {
+	ex, err := os.Executable()
+
+	if err != nil {
+		return "", err
+	}
+	exPath := filepath.Dir(ex)
+	realPath, err := filepath.EvalSymlinks(exPath)
+	if err != nil {
+		return "", err
+	}
+
+	return realPath, nil
 }

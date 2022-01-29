@@ -2,6 +2,8 @@ package hsp_utils
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -91,4 +93,102 @@ func StrDBToMapKey(str string) string {
 	}
 
 	return resStr
+}
+
+func WriteSTInfoJsonFiles(stInfo interface{}, fileName string) error {
+	// 创建文件
+	filePtr, err := os.Create(fileName)
+	if err != nil {
+		fmt.Println("Create file failed", err.Error())
+		return err
+	}
+	defer filePtr.Close()
+
+	// 创建Json编码器
+	// encoder := json.NewEncoder(filePtr)
+
+	// err = encoder.Encode(srcDataList)
+	// if err != nil {
+	// 	fmt.Println("Encoder failed", err.Error())
+	// 	return err
+	// } else {
+	// 	fmt.Println("Encoder success")
+	// }
+
+	// 带JSON缩进格式写文件
+	data, err := json.MarshalIndent(stInfo, "", "  ")
+	if err != nil {
+		// fmt.Println("Encoder failed", err.Error())
+		return err
+	} else {
+		// fmt.Println("Encoder success")
+	}
+
+	filePtr.Write(data)
+
+	return nil
+}
+
+//示例程序结构体声明开始
+type OfflinePtInfoST struct {
+	SupportID   float64 `json:"supportID"`
+	Pos         float64 `json:"pos"`
+	Speed       float64 `json:"speed"`
+	Direction   bool    `json:"direction"`
+	LeftHeight  float64 `json:"leftHeight"`
+	RightHeight float64 `json:"rightHeight"`
+	PitchAngle  float64 `json:"pitchAngle"`
+	Inclinator  float64 `json:"inclinator"`
+}
+type RequestIteminfoST struct {
+	ActType     string            `json:"type"`
+	Id          int               `json:"id"`
+	StSID       int               `json:"stSID"`
+	EndSID      int               `json:"endSID"`
+	MaxSpd      int               `json:"maxSpd"`
+	LeftHeight  int               `json:"leftHeight"`
+	RightHeight int               `json:"rightHeight"`
+	Datas       []OfflinePtInfoST `json:"datas"`
+}
+
+//示例程序结构体声明结束
+func ReadSTInfoJsonFiles_Example(filePathName string) (x RequestIteminfoST, err error) {
+
+	//json文件读取
+	fd, err := os.Open(filePathName)
+	if err != nil {
+		fmt.Println("error when open file:", filePathName)
+		return
+	}
+	defer fd.Close()
+	err = json.NewDecoder(fd).Decode(&x)
+
+	return
+}
+
+func ReadSTInfoJsonFiles(filePathName string) (x interface{}, err error) {
+
+	//json文件读取
+	fd, err := os.Open(filePathName)
+	if err != nil {
+		fmt.Println("error when open file:", filePathName)
+		return
+	}
+	defer fd.Close()
+	err = json.NewDecoder(fd).Decode(&x)
+
+	return
+}
+
+func DelFiles(filePathName string) error {
+	return os.Remove(filePathName)
+}
+
+func CheckFileExist(filePathName string) bool {
+	var exist = true
+	if _, err := os.Stat(filePathName); os.IsNotExist(err) {
+		exist = false
+	}
+
+	return exist
 }
